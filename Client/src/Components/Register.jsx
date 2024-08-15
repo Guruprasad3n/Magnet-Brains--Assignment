@@ -19,7 +19,8 @@ const Register = () => {
         password,
       });
       if (res.data && res.data.token) {
-        localStorage.setItem("token", res.data.token); // Store the token in local storage
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.id);
         setMessage("Registration successful! You are now logged in.");
         navigate("/home");
       } else {
@@ -28,7 +29,9 @@ const Register = () => {
     } catch (err) {
       console.error("Error during registration:", err);
       setMessage(
-        err.response?.data?.msg || err.message || "An error occurred during registration"
+        err.response?.data?.msg ||
+          err.message ||
+          "An error occurred during registration"
       );
     }
   };

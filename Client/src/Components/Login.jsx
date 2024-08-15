@@ -16,6 +16,7 @@ const Login = () => {
       const res = await axios.post("/api/auth/login", { email, password });
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userId", res.data.id);
         setMessage("Login successful!");
         navigate("/home");
         setIsError(false);

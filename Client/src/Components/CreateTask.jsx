@@ -11,10 +11,14 @@ const CreateTask = () => {
   const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
 
+
+
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
+      const user = localStorage.getItem("userId")
       console.log("TOke", token);
       const res = await fetch("http://localhost:8000/api/tasks/", {
         method: "POST",
@@ -22,13 +26,16 @@ const CreateTask = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title, description, dueDate, priority }),
+        body: JSON.stringify({ title, description, dueDate, priority, user }),
       });
       console.log("response", res);
     } catch (error) {
       console.log(error);
     }
   };
+
+
+
 
   return (
     <div className="create-task-container">
