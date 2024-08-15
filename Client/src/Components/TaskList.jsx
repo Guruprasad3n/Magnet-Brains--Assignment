@@ -41,25 +41,6 @@ const TaskList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const [pendingCount, setPendingCount] = useState(0);
-  const [completedCount, setCompletedCount] = useState(0);
-
-  const fetchCounts = async () => {
-    let token = localStorage.getItem("token");
-    try {
-      const headers = {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      };
-      const response = await axios.get("/api/task-counts", { headers });
-      setPendingCount(response.data.pendingCount);
-      setCompletedCount(response.data.completedCount);
-    } catch (error) {
-      console.error("Error fetching task counts:", error);
-      setError("Failed to fetch task counts. Please try again later.");
-    }
-  };
-
   const getTasks = async (page = 1) => {
     let token = localStorage.getItem("token");
     try {
@@ -127,59 +108,9 @@ const TaskList = () => {
       <div className="task-container">
         <h3>
           {filter === "pending" ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textDecoration: "none",
-              }}
-            >
-              Pending Tasks -{" "}
-              <span
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "1px solid red",
-                  borderRadius: "50px",
-                  backgroundColor: "red",
-                  padding: "5px",
-                  width: "30px",
-                  color: "white",
-                  textDecoration: "none",
-                }}
-              >
-                {pendingCount}
-              </span>
-            </div>
+            <div>Pending Tasks</div>
           ) : (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                textDecoration: "none",
-              }}
-            >
-              Completed Tasks -{" "}
-              <span
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  border: "1px solid green",
-                  borderRadius: "50px",
-                  backgroundColor: "green",
-                  padding: "5px",
-                  width: "30px",
-                  color: "white",
-                  textDecoration: "none",
-                }}
-              >
-                {completedCount}
-              </span>
-            </div>
+            <div>Completed Tasks</div>
           )}
         </h3>
         {filteredTasks.length === 0 ? (

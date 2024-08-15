@@ -24,7 +24,7 @@ const CreateTask = () => {
         },
         body: JSON.stringify({ title, description, dueDate, priority }),
       });
-      console.log(res);
+      console.log("response", res);
     } catch (error) {
       console.log(error);
     }

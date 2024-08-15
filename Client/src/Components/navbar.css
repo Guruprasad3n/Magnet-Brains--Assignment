@@ -26,6 +26,9 @@
 
 .navbar li {
   margin: 0 15px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .navbar a {
@@ -38,6 +41,7 @@
   color: white;
   border: none;
   padding: 10px;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   cursor: pointer;
   border-radius: 5px;
 }

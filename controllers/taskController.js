@@ -109,28 +109,7 @@ const deleteTask = async (req, res) => {
   }
 };
 
-const getTaskCounts = async (req, res) => {
-  try {
-    const pendingCount = await TaskSchema.countDocuments({
-      user: req.user.id,
-      status: 'pending'
-    });
-    const completedCount = await TaskSchema.countDocuments({
-      user: req.user.id,
-      status: 'completed'
-    });
-    
-    return res.status(200).json({
-      pendingCount,
-      completedCount
-    });
-  } catch (error) {
-    console.error("Error fetching task counts:", error);
-    return res.status(500).json({
-      message: "Failed to fetch task counts"
-    });
-  }
-};
+
 
 
 module.exports = {
@@ -139,5 +118,5 @@ module.exports = {
   getTaskById,
   updateTask,
   deleteTask,
-  getTaskCounts,
+  
 };
