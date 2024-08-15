@@ -1,0 +1,154 @@
+.task-details-container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-details-container h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2d3748;
+}
+
+.task-details-container h3 {
+  font-size: 20px;
+  color: #2c5282;
+  margin-bottom: 10px;
+}
+
+.task-details-container p {
+  font-size: 16px;
+  color: #4a5568;
+  margin-bottom: 10px;
+}
+
+.task-details-container strong {
+  color: #2c5282;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.button-group button {
+  background-color: #3182ce;
+  color: #ffffff;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button-group button:hover {
+  background-color: #2b6cb0;
+}
+
+.button-group .delete-button {
+  background-color: #e53e3e;
+}
+
+.button-group .delete-button:hover {
+  background-color: #c53030;
+}
+
+/* Modal */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.modal-buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+.confirm-button,
+.cancel-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.confirm-button {
+  background-color: #e53e3e;
+  color: #ffffff;
+}
+
+.confirm-button:hover {
+  background-color: #c53030;
+}
+
+.cancel-button {
+  background-color: #a0aec0;
+  color: #ffffff;
+}
+
+.cancel-button:hover {
+  background-color: #718096;
+}
+
+
+
+/* Edit Modal */  
+  .form-group {
+    margin-bottom: 15px;
+    text-align: left;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+  }
+  
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 5px;
+  }
+  
+  .form-group textarea {
+    resize: vertical;
+  }
+  
+  button[type="submit"] {
+    background-color: #2d3748;
+    color: #ffffff;
+    padding: 10px 20px;
+  }
+  
+  button[type="submit"]:hover {
+    background-color: #1a202c;
+  }
+  

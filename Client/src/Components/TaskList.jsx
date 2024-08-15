@@ -1,41 +1,209 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Link } from "react-router-dom";
+import Pagination from "./Pagination";
+import "./taskList.css";
 
 const TaskList = () => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const containerStyle = {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100vh",
+  };
+
+  const loaderStyle = {
+    border: "5px solid #f3f3f3",
+    borderRadius: "50%",
+    borderTop: "5px solid #3498db",
+    width: "80px",
+    height: "80px",
+    animation: "spin 2s linear infinite",
+  };
 
   useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get('/api/tasks', {
-          headers: { 'x-auth-token': token }
-        });
-        setTasks(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching tasks:', error);
-        setLoading(false);
+    const styleSheet = document.styleSheets[0];
+    styleSheet.insertRule(
+      `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
-    };
-
-    fetchTasks();
+    `,
+      styleSheet.cssRules.length
+    );
   }, []);
 
-  if (loading) return <p>Loading tasks...</p>;
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filter, setFilter] = useState("pending");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+  const [pendingCount, setPendingCount] = useState(0);
+  const [completedCount, setCompletedCount] = useState(0);
+
+  const fetchCounts = async () => {
+    let token = localStorage.getItem("token");
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+      const response = await axios.get("/api/task-counts", { headers });
+      setPendingCount(response.data.pendingCount);
+      setCompletedCount(response.data.completedCount);
+    } catch (error) {
+      console.error("Error fetching task counts:", error);
+      setError("Failed to fetch task counts. Please try again later.");
+    }
+  };
+
+  const getTasks = async (page = 1) => {
+    let token = localStorage.getItem("token");
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await axios.get(`/api/tasks?page=${page}&limit=20`, {
+        headers,
+      });
+      setTasks(response.data.tasks);
+      setTotalPages(response.data.totalPages);
+      setCurrentPage(page);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      setError("Failed to fetch tasks. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // useEffect(() => {
+  //   fetchCounts();
+  // }, []);
+  useEffect(() => {
+    getTasks(currentPage);
+  }, [currentPage]);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
+  const filteredTasks = tasks.filter((task) => task.status === filter);
+
+  if (loading) {
+    return (
+      <div style={containerStyle}>
+        <div style={loaderStyle}></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
-    <div>
-      <h2>Task List</h2>
-      <ul>
-        {tasks.map(task => (
-          <li key={task._id}>
-            <Link to={`/tasks/${task._id}`}>{task.title}</Link> - {task.dueDate} - {task.status}
-          </li>
-        ))}
-      </ul>
+    <div className="task-list-container">
+      <div className="task-filter">
+        <label htmlFor="task-filter">Select Task Type:</label>
+        <select
+          id="task-filter"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+        >
+          <option value="pending">Pending Tasks </option>
+          <option value="completed">Completed Tasks </option>
+        </select>
+      </div>
+
+      <div className="task-container">
+        <h3>
+          {filter === "pending" ? (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textDecoration: "none",
+              }}
+            >
+              Pending Tasks -{" "}
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid red",
+                  borderRadius: "50px",
+                  backgroundColor: "red",
+                  padding: "5px",
+                  width: "30px",
+                  color: "white",
+                  textDecoration: "none",
+                }}
+              >
+                {pendingCount}
+              </span>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                textDecoration: "none",
+              }}
+            >
+              Completed Tasks -{" "}
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  border: "1px solid green",
+                  borderRadius: "50px",
+                  backgroundColor: "green",
+                  padding: "5px",
+                  width: "30px",
+                  color: "white",
+                  textDecoration: "none",
+                }}
+              >
+                {completedCount}
+              </span>
+            </div>
+          )}
+        </h3>
+        {filteredTasks.length === 0 ? (
+          <p>No {filter === "pending" ? "pending" : "completed"} tasks.</p>
+        ) : (
+          <ul className="task-list">
+            {filteredTasks.map((task) => (
+              <Link to={`/tasks/${task._id}`} key={task._id}>
+                <li className="task-item">
+                  <h2 style={{ color: "white" }}>{task.title}</h2>
+                  <p>
+                    {formatDate(task.dueDate)} - {task.status}
+                  </p>
+                </li>
+              </Link>
+            ))}
+          </ul>
+        )}
+      </div>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+      />
     </div>
   );
 };
