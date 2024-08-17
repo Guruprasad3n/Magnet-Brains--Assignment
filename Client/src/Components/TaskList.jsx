@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Pagination from "./Pagination";
-import "./taskList.css";
+import "./CSS/taskList.css";
 
 const TaskList = () => {
   const containerStyle = {
@@ -38,6 +38,7 @@ const TaskList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("pending");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -49,8 +50,7 @@ const TaskList = () => {
         "Content-Type": "application/json",
       };
 
-      const response = await axios.get(`/api/tasks?page=${page}&limit=20`, 
-        {
+      const response = await axios.get(`/api/tasks?page=${page}&limit=20`, {
         headers,
       });
       setTasks(response.data.tasks);
@@ -75,7 +75,37 @@ const TaskList = () => {
     const year = date.getFullYear();
     return `${day}-${month}-${year}`;
   };
-  const filteredTasks = tasks.filter((task) => task.status === filter);
+
+  const handlePriorityChange = async (taskId, newPriority) => {
+    let token = localStorage.getItem("token");
+
+    try {
+      const headers = {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      };
+
+      const response = await axios.put(
+        `/api/tasks/${taskId}`,
+        { priority: newPriority },
+        { headers }
+      );
+
+      if (response.status === 200) {
+        getTasks(currentPage);
+      }
+    } catch (error) {
+      console.error("Error updating task priority:", error);
+      setError("Failed to update task priority. Please try again later.");
+    }
+  };
+
+  const filteredTasks = tasks.filter((task) => {
+    return (
+      task.status === filter &&
+      (priorityFilter === "all" || task.priority === priorityFilter)
+    );
+  });
 
   if (loading) {
     return (
@@ -98,30 +128,80 @@ const TaskList = () => {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         >
-          <option value="pending">Pending Tasks </option>
-          <option value="completed">Completed Tasks </option>
+          <option value="pending">Pending Tasks</option>
+          <option value="completed">Completed Tasks</option>
         </select>
       </div>
 
+      <div className="priority-filter">
+        <label>Priority:</label>
+        <input
+          type="radio"
+          id="priority-all"
+          name="priority"
+          value="all"
+          checked={priorityFilter === "all"}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        />
+        <label htmlFor="priority-all">All</label>
+
+        <input
+          type="radio"
+          id="priority-low"
+          name="priority"
+          value="low"
+          checked={priorityFilter === "low"}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        />
+        <label htmlFor="priority-low">Low</label>
+
+        <input
+          type="radio"
+          id="priority-medium"
+          name="priority"
+          value="medium"
+          checked={priorityFilter === "medium"}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        />
+        <label htmlFor="priority-medium">Medium</label>
+
+        <input
+          type="radio"
+          id="priority-high"
+          name="priority"
+          value="high"
+          checked={priorityFilter === "high"}
+          onChange={(e) => setPriorityFilter(e.target.value)}
+        />
+        <label htmlFor="priority-high">High</label>
+      </div>
+
       <div className="task-container">
-        <h3>
-          {filter === "pending" ? (
-            <div>Pending Tasks</div>
-          ) : (
-            <div>Completed Tasks</div>
-          )}
-        </h3>
+        <h3>{filter === "pending" ? "Pending Tasks" : "Completed Tasks"}</h3>
         {filteredTasks.length === 0 ? (
           <p>No {filter === "pending" ? "pending" : "completed"} tasks.</p>
         ) : (
           <ul className="task-list">
             {filteredTasks.map((task) => (
               <Link to={`/tasks/${task._id}`} key={task._id}>
-                <li className="task-item">
+                <li className={`task-item ${task.priority}`}>
                   <h2 style={{ color: "white" }}>{task.title}</h2>
                   <p>
                     {formatDate(task.dueDate)} - {task.status}
                   </p>
+                  <select
+                    disabled
+                    value={task.priority}
+                    onChange={(e) => {
+                      e.stopPropagation();
+                      handlePriorityChange(task._id, e.target.value);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                  </select>
                 </li>
               </Link>
             ))}

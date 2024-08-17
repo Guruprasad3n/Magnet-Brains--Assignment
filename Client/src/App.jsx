@@ -7,7 +7,7 @@ import PublicRoute from "./Components/PublicRoute";
 import Login from "./Components/Login";
 import Register from "./Components/Register";
 import Navbar from "./Components/Navbar";
-import "./Components/navbar.css";
+import "./Components/CSS/navbar.css";
 import CreateTask from "./Components/CreateTask";
 
 const App = () => {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
-import "./taskDetails.css";
+import "./CSS/taskDetails.css";
 
 const TaskDetails = () => {
   const [task, setTask] = useState(null);
@@ -13,6 +13,7 @@ const TaskDetails = () => {
     description: "",
     dueDate: "",
     status: "",
+    priority: "",
   });
   const [userOptions, setUserOptions] = useState([]);
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -32,8 +33,9 @@ const TaskDetails = () => {
           description: response.data.task.description,
           dueDate: response.data.task.dueDate,
           status: response.data.task.status,
+          priority: response.data.task.priority,
         });
-        setSelectedUsers(response.data.task.assignedUsers || []); // Set initially assigned users
+        setSelectedUsers(response.data.task.assignedUsers || []);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching task:", error);
@@ -271,6 +273,20 @@ const TaskDetails = () => {
                 >
                   <option value="pending">Pending</option>
                   <option value="completed">Completed</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label htmlFor="priority">Priority:</label> 
+                <select
+                  id="priority"
+                  name="priority"
+                  value={editedTask.priority}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
                 </select>
               </div>
               <div className="modal-buttons">
