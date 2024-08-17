@@ -7,7 +7,7 @@ const createTask = async (req, res) => {
       user: req.user.id,
       title,
       description,
-      dueDate,
+      dueDate: dueDate ? new Date(dueDate) : new Date(),
       priority,
     });
     const task = await newTask.save();
@@ -30,9 +30,6 @@ const getTasks = async (req, res) => {
       .exec();
     const totalTasks = await TaskSchema.countDocuments({ user: req.user.id });
 
-    if (!tasks) {
-      return res.status(404).send({ message: "Tasks Not Found" });
-    }
     return res.status(200).send({
       totalPages: Math.ceil(totalTasks / limit),
       currentPage: page,
@@ -52,7 +49,10 @@ const getTaskById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const task = await TaskSchema.findById(id);
+    const task = await TaskSchema.findById(id).populate(
+      "assignedUsers",
+      "name"
+    );
 
     if (!task) {
       return res.status(404).send({ message: "Task not found" });
@@ -69,12 +69,13 @@ const getTaskById = async (req, res) => {
 
 const updateTask = async (req, res) => {
   const { id } = req.params;
-  const { title, description, dueDate, status, priority } = req.body;
+  const { title, description, dueDate, status, priority, assignedUsers } =
+    req.body;
 
   try {
     const task = await TaskSchema.findByIdAndUpdate(
       id,
-      { title, description, dueDate, status, priority },
+      { title, description, dueDate, status, priority, assignedUsers },
       { new: true, runValidators: true }
     );
 
@@ -82,7 +83,21 @@ const updateTask = async (req, res) => {
       return res.status(404).send({ message: "Task not found" });
     }
 
-    return res.status(200).send({ message: "Task updated successfully", task });
+    if (assignedUsers) {
+      task.assignedUsers = assignedUsers;
+    }
+
+    if (title) task.title = title;
+    if (description) task.description = description;
+    if (dueDate) task.dueDate = dueDate;
+    if (status) task.status = status;
+    if (priority) task.priority = priority;
+
+    const updatedTask = await task.save();
+
+    return res
+      .status(200)
+      .send({ message: "Task updated successfully", task: updatedTask });
   } catch (error) {
     console.error("Something went wrong while updating the task:", error);
     return res
@@ -109,8 +124,64 @@ const deleteTask = async (req, res) => {
   }
 };
 
+// const assignUsersToTask = async (req, res) => {
+//   const { id } = req.params;
+//   const { users } = req.body;
 
+//   try {
+//     const task = await TaskSchema.findByIdAndUpdate(
+//       id,
+//       { $addToSet: { assignedUsers: { $each: users } } },
+//       { new: true, runValidators: true }
+//     ).populate("assignedUsers", "-password");
 
+//     if (!task) {
+//       return res.status(404).send({ message: "Task not found" });
+//     }
+
+//     return res
+//       .status(200)
+//       .send({ message: "Users assigned successfully", task });
+//   } catch (error) {
+//     console.error(
+//       "Something went wrong while assigning users to the task:",
+//       error
+//     );
+//     return res.status(500).send({
+//       message: "Something went wrong while assigning users to the task",
+//     });
+//   }
+// };
+
+const assignUsersToTask = async (req, res) => {
+  const { id } = req.params;
+  const { users } = req.body;
+
+  try {
+    // Find the task by ID and update it by adding the users to the assignedUsers field
+    const task = await TaskSchema.findByIdAndUpdate(
+      id,
+      { $addToSet: { assignedUsers: { $each: users } } }, // Add users without duplicates
+      { new: true, runValidators: true }
+    ).populate("assignedUsers", "name email"); // Populate with user name and email, excluding the password
+
+    if (!task) {
+      return res.status(404).send({ message: "Task not found" });
+    }
+
+    return res
+      .status(200)
+      .send({ message: "Users assigned successfully", task });
+  } catch (error) {
+    console.error(
+      "Something went wrong while assigning users to the task:",
+      error
+    );
+    return res.status(500).send({
+      message: "Something went wrong while assigning users to the task",
+    });
+  }
+};
 
 module.exports = {
   createTask,
@@ -118,5 +189,5 @@ module.exports = {
   getTaskById,
   updateTask,
   deleteTask,
-  
+  assignUsersToTask,
 };

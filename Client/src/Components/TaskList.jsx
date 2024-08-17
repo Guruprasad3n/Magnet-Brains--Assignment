@@ -49,7 +49,8 @@ const TaskList = () => {
         "Content-Type": "application/json",
       };
 
-      const response = await axios.get(`/api/tasks?page=${page}&limit=20`, {
+      const response = await axios.get(`/api/tasks?page=${page}&limit=20`, 
+        {
         headers,
       });
       setTasks(response.data.tasks);
@@ -63,9 +64,6 @@ const TaskList = () => {
     }
   };
 
-  // useEffect(() => {
-  //   fetchCounts();
-  // }, []);
   useEffect(() => {
     getTasks(currentPage);
   }, [currentPage]);

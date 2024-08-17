@@ -14,6 +14,8 @@ const TaskDetails = () => {
     dueDate: "",
     status: "",
   });
+  const [userOptions, setUserOptions] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -31,6 +33,7 @@ const TaskDetails = () => {
           dueDate: response.data.task.dueDate,
           status: response.data.task.status,
         });
+        setSelectedUsers(response.data.task.assignedUsers || []); // Set initially assigned users
         setLoading(false);
       } catch (error) {
         console.error("Error fetching task:", error);
@@ -40,6 +43,43 @@ const TaskDetails = () => {
 
     fetchTask();
   }, [id]);
+
+  const fetchUsers = async (query) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`/api/auth/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const formattedUsers = response.data.users.map((user) => ({
+        value: user._id,
+        label: user.name || "Unknown",
+      }));
+      // console.log("formattedUsers", formattedUsers);
+      setUserOptions(formattedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleAssignUsers = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `/api/tasks/${id}/assign`,
+        { users: selectedUsers },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      alert("Users assigned successfully");
+      setTask((prev) => ({
+        ...prev,
+        assignedUsers: response.data.task.assignedUsers,
+      }));
+    } catch (error) {
+      console.error("Error assigning users:", error);
+    }
+  };
 
   const handleDelete = async () => {
     try {
@@ -82,6 +122,21 @@ const TaskDetails = () => {
     }));
   };
 
+  const handleUserSelect = (e) => {
+    const { options } = e.target;
+    const selectedValues = [];
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selectedValues.push(options[i].value);
+      }
+    }
+    setSelectedUsers(selectedValues);
+  };
+
+  const handleSearchChange = (e) => {
+    fetchUsers(e.target.value);
+  };
+
   if (loading) return <p>Loading task details...</p>;
 
   return (
@@ -99,6 +154,43 @@ const TaskDetails = () => {
           <p>
             <strong>Status:</strong> {task.status}
           </p>
+
+          <div className="assigned-users">
+            <strong>Assigned to:</strong>
+            {task.assignedUsers && task.assignedUsers.length > 0 ? (
+              <ul>
+                {task.assignedUsers.map((user) => (
+                  <li key={user._id}>{user.name || "Unknown"}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No users assigned</p>
+            )}
+          </div>
+
+          <div className="assign-users-container">
+            <label htmlFor="assign-users">Assign Users:</label>
+            <input
+              type="text"
+              id="assign-users-search"
+              placeholder="Search users"
+              onChange={handleSearchChange}
+            />
+            <select
+              id="assign-users"
+              multiple
+              value={selectedUsers}
+              onChange={handleUserSelect}
+            >
+              {userOptions.map((user) => (
+                <option key={user.value} value={user.value}>
+                  {user.label}
+                </option>
+              ))}
+            </select>
+            <button onClick={handleAssignUsers}>Assign</button>
+          </div>
+
           <div className="button-group">
             <button onClick={toggleEditModal}>Edit Task</button>
             <button className="delete-button" onClick={toggleDeleteModal}>

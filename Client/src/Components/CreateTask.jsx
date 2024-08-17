@@ -3,39 +3,56 @@ import { useNavigate } from "react-router-dom";
 import "./createTask.css";
 
 const CreateTask = () => {
-  const [title, setTitle] = useState("asd");
-  const [description, setDescription] = useState("asd");
-  const [dueDate, setDueDate] = useState("2024-01-01");
-  const [priority, setPriority] = useState("Low");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [priority, setPriority] = useState("low");
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
   const navigate = useNavigate();
 
-
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const token = localStorage.getItem("token");
-      const user = localStorage.getItem("userId")
-      console.log("TOke", token);
-      const res = await fetch("http://localhost:8000/api/tasks/", {
+      const user = localStorage.getItem("userId");
+      console.log(user);
+      if (!token) {
+        throw new Error("No token found. Please log in.");
+      }
+
+      const response = await fetch(`http://localhost:8000/api/tasks/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ title, description, dueDate, priority, user }),
+        body: JSON.stringify({
+          title,
+          description,
+          dueDate,
+          priority,
+        }),
       });
-      console.log("response", res);
+      console.log("response", response);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create task.");
+      }
+
+      const data = await response.json();
+      console.log("data", data);
+      setMessage(data.message || "Task created successfully.");
+      setIsError(false);
+      // navigate("/tasks");
     } catch (error) {
-      console.log(error);
+      console.error("Error:", error.message);
+      setMessage(error.message);
+      setIsError(true);
     }
   };
-
-
-
 
   return (
     <div className="create-task-container">
@@ -58,9 +75,9 @@ const CreateTask = () => {
           onChange={(e) => setDueDate(e.target.value)}
         />
         <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value="Low">Low</option>
-          <option value="Medium">Medium</option>
-          <option value="High">High</option>
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
         </select>
         <button type="submit">Create Task</button>
       </form>

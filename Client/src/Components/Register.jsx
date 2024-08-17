@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import "./register.css"; // Import the CSS file for styling
+import "./register.css";
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // Hook for navigation
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+
     try {
       const res = await axios.post("/api/auth/register", {
         name,
@@ -20,9 +23,16 @@ const Register = () => {
       });
       if (res.data && res.data.token) {
         localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userId", res.data.id);
-        setMessage("Registration successful! You are now logged in.");
-        navigate("/home");
+        localStorage.setItem("userId", res.data.user.id);
+        let name = localStorage.setItem("name", res.data.user.name);
+        console.log(name, res);
+        let token = localStorage.getItem("token");
+        if (token) {
+          setMessage("Registration successful! You are now logged in.");
+          navigate("/home");
+        } else {
+          alert("Please go to the Login Page");
+        }
       } else {
         throw new Error("Failed to retrieve token. Please try again.");
       }
@@ -33,6 +43,8 @@ const Register = () => {
           err.message ||
           "An error occurred during registration"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -62,8 +74,8 @@ const Register = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-          <button type="submit" className="register-button">
-            Register
+          <button type="submit" className="register-button" disabled={loading}>
+            {loading ? <span className="loading-dots"></span> : "Register"}
           </button>
           <p>
             Already have an account? <Link to="/login">Login</Link>

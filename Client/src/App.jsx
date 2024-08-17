@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
-import Home from "./Components/Home";
-import TaskList from "./Components/TaskList"; // Example task management component
-import TaskDetails from "./Components/TaskDetails"; // Example task details component
+import TaskList from "./Components/TaskList";
+import TaskDetails from "./Components/TaskDetails";
 import PrivateRoute from "./Components/PrivateRoute";
 import PublicRoute from "./Components/PublicRoute";
 import Login from "./Components/Login";
@@ -10,14 +9,22 @@ import Register from "./Components/Register";
 import Navbar from "./Components/Navbar";
 import "./Components/navbar.css";
 import CreateTask from "./Components/CreateTask";
-import CreateTask1 from "./Components/CreateTask1";
 
 const App = () => {
   const token = localStorage.getItem("token");
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   return (
     <div className="App">
-      {token && <Navbar />}
+      {token && isLoggedIn && <Navbar />}
       <div className="app-content">
         <Routes>
           <Route path="/" element={<Navigate to="/home" />} />
@@ -61,7 +68,6 @@ const App = () => {
               </PrivateRoute>
             }
           />
-          <Route path="create" element={<CreateTask1 />} />
         </Routes>
       </div>
     </div>

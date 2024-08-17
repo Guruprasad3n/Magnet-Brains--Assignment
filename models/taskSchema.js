@@ -25,6 +25,12 @@ const TaskSchema = new Schema({
     enum: ["pending", "completed"],
     default: "pending",
   },
+  assignedUsers: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
 });
 
 module.exports = model("Task", TaskSchema);

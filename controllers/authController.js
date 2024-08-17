@@ -55,7 +55,7 @@ const login = async (req, res) => {
       { expiresIn: "1h" },
       (err, token) => {
         if (err) throw err;
-        res.json({ token });
+        return res.json({ token, id: user.id, name: user.name });
       }
     );
   } catch (err) {
@@ -63,4 +63,14 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+const allUsers = async (req, res) => {
+  try {
+    const users = await User.find({});
+    return res.status(200).send({ users });
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+module.exports = { register, login, allUsers };

@@ -1,8 +1,7 @@
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:8000"; // Replace with your backend API URL
+axios.defaults.baseURL = "http://localhost:8000";
 
-// You can also set the token for future requests if the user is already logged in
 const token = localStorage.getItem("token");
 if (token) {
   axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
